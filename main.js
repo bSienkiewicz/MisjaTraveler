@@ -3,6 +3,9 @@ require("chromedriver");
 const fs = require("fs");
 
 let reportString = "";
+let numberOfTerms = 0;
+let scrapeUrl =
+  "https://www.misjatravel.pl/?country-phrase%5B%5D=&search=offer&departure_city=&start_date=&end_date=&ppp=999";
 const currentDate = new Date();
 currentDate.setUTCHours(currentDate.getUTCHours() + 2); // Add 2 hours for GMT+2
 
@@ -13,7 +16,6 @@ const hours = currentDate.getUTCHours().toString().padStart(2, "0");
 const minutes = currentDate.getUTCMinutes().toString().padStart(2, "0");
 
 const fileName = `Raport MT ${day}-${month}-${year} ${hours}:${minutes}`;
-
 
 async function closeCookie(driver) {
   try {
@@ -36,11 +38,13 @@ async function closeCookie(driver) {
 async function getOffers() {
   let links = [];
 
+  fs.mkdir("raporty", () => {
+    return;
+  });
+
   let driver = await new Builder().forBrowser("chrome").build();
   try {
-    await driver.get(
-      "https://www.misjatravel.pl/?country-phrase%5B%5D=&search=offer&departure_city=&start_date=&end_date=&ppp=999"
-    );
+    await driver.get(scrapeUrl);
 
     await closeCookie(driver);
 
@@ -74,14 +78,11 @@ async function getOffers() {
 }
 
 async function compareOffers(driver, links) {
-  // let driver = await new Builder().forBrowser("chrome").build();
   try {
     // loop through all links
     for (let i = 0; i < links.length; i++) {
       await driver.get(links[i].link);
       let singleOffers = {};
-
-      // await closeCookie(driver);
 
       let cardOffers = await driver.wait(
         until.elementsLocated(By.className("card--term-simple")),
@@ -194,11 +195,7 @@ async function compareOffers(driver, links) {
           console.log("Error parsing data. Skipping to the next index...");
           reportString += `[] Termin ${singleOffers[key].date} - Oferta nieaktualna...\n`;
         } finally {
-          fs.writeFile(`raporty/${fileName}.txt`, reportString, (err) => {
-            if (err) {
-              console.error("Error writing to file:", err);
-            }
-          });
+          numberOfTerms++;
         }
       }
     }
@@ -206,6 +203,17 @@ async function compareOffers(driver, links) {
     console.log(err);
   } finally {
     await driver.quit();
+    console.log(
+      "\nZakończono sprawdzanie. Pomyślnie sprawdzono " +
+        numberOfTerms +
+        " terminów"
+    );
+    reportString += `\nZakończono sprawdzanie. Pomyślnie sprawdzono ${numberOfTerms} terminów\n`;
+    fs.writeFile(`raporty/${fileName}.txt`, reportString, (err) => {
+      if (err) {
+        console.error("Error writing to file:", err);
+      }
+    });
   }
 }
 
