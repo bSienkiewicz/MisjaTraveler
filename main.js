@@ -4,16 +4,16 @@ const fs = require("fs");
 
 let reportString = "";
 const currentDate = new Date();
-const formattedDate = currentDate.toLocaleString("en-US", {
-  timeZone: "UTC",
-  year: "numeric",
-  month: "2-digit",
-  day: "2-digit",
-  hour: "2-digit",
-  minute: "2-digit",
-});
+currentDate.setUTCHours(currentDate.getUTCHours() + 2); // Add 2 hours for GMT+2
 
-const fileName = `Raport MT ${formattedDate.replace(/\//g, "-")}`;
+const day = currentDate.getUTCDate().toString().padStart(2, "0");
+const month = (currentDate.getUTCMonth() + 1).toString().padStart(2, "0"); // Month is zero-based
+const year = currentDate.getUTCFullYear().toString();
+const hours = currentDate.getUTCHours().toString().padStart(2, "0");
+const minutes = currentDate.getUTCMinutes().toString().padStart(2, "0");
+
+const fileName = `Raport MT ${day}-${month}-${year} ${hours}:${minutes}`;
+
 
 async function closeCookie(driver) {
   try {
@@ -62,7 +62,9 @@ async function getOffers() {
         price: price.replace(" zł", ""),
       });
     }
-    console.log("Found " + links.length + " offers");
+    console.log("Znaleziono " + links.length + " ofert");
+
+    reportString += `Znaleziono ${links.length} ofert. Rozpoczynanie sprawdzania.\n`;
   } catch (err) {
     console.log(err);
     driver.quit();
