@@ -116,6 +116,8 @@ async function compareOffers(driver, links) {
         };
       }
 
+      console.log(`\n\x1b[45mSPRAWDZONO ${i} / ${links.length} (${(i/links.length*100).toFixed(2)}%)\x1b[0m\n\n`);
+
       console.log(
         "Sprawdzanie " +
           Object.keys(singleOffers).length +
@@ -124,7 +126,7 @@ async function compareOffers(driver, links) {
       );
       reportString += `--------------\n${tripName} (${Object.keys(
         singleOffers
-      )} terminów)\n${links[i].link}\n--------------\n`;
+      ).length} terminów)\n${links[i].link}\n--------------\n`;
 
       // SYKON LOOP
 
