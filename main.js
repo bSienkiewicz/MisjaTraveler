@@ -1,11 +1,13 @@
 const { By, Builder, until } = require("selenium-webdriver");
 require("chromedriver");
 const fs = require("fs");
+const { on } = require("events");
 
 let reportString = "";
+let lowerPricesCount = 0;
+let scrapeDomain = "MisjaTravel";
 let numberOfTerms = 0;
-let scrapeUrl =
-  "https://www.misjatravel.pl/?country-phrase%5B%5D=&search=offer&departure_city=&start_date=&end_date=&ppp=999";
+let onlyLowerPrices = false;
 const currentDate = new Date();
 currentDate.setUTCHours(currentDate.getUTCHours() + 2); // Add 2 hours for GMT+2
 
@@ -15,7 +17,20 @@ const year = currentDate.getUTCFullYear().toString();
 const hours = currentDate.getUTCHours().toString().padStart(2, "0");
 const minutes = currentDate.getUTCMinutes().toString().padStart(2, "0");
 
-const fileName = `Raport MT ${day}-${month}-${year} ${hours}:${minutes}`;
+
+const args = process.argv.slice(2);
+if (args.length > 0) {
+  if (args.includes("--go")) {
+    scrapeDomain = "MisjaGo"
+  }
+  if (args.includes("--short")) {
+    onlyLowerPrices = true;
+  }
+}
+
+const scrapeURL = `https://www.${scrapeDomain}.pl/?country-phrase%5B%5D=&search=offer&departure_city=&start_date=&end_date=&ppp=1`
+
+const fileName = `Raport ${scrapeDomain} ${day}-${month}-${year} ${hours}-${minutes}`;
 
 async function closeCookie(driver) {
   try {
@@ -44,7 +59,7 @@ async function getOffers() {
 
   let driver = await new Builder().forBrowser("chrome").build();
   try {
-    await driver.get(scrapeUrl);
+    await driver.get(scrapeURL);
 
     await closeCookie(driver);
 
@@ -67,6 +82,8 @@ async function getOffers() {
       });
     }
     console.log("Znaleziono " + links.length + " ofert");
+
+    reportString += `Raport ${scrapeDomain} ${day}-${month}-${year} ${hours}:${minutes}\n\n`
 
     reportString += `Znaleziono ${links.length} ofert. Rozpoczynanie sprawdzania.\n`;
   } catch (err) {
@@ -178,6 +195,7 @@ async function compareOffers(driver, links) {
             }
           }
 
+          // found lower price
           if (lowestPrice < singleOffers[key].price) {
             console.log(
               ` └─ [!!!] ${lowestPrice}zł - \x1b[31mCena nizsza o ${
@@ -187,6 +205,8 @@ async function compareOffers(driver, links) {
             reportString += ` └─ [!!!] ${lowestPrice}zł - CENA NIŻSZA O ${
               singleOffers[key].price - lowestPrice
             }ZŁ\n`;
+            lowerPricesCount++;
+
           } else {
             console.log(
               ` └─  Najnizsza cena: ${singleOffers[key].price}zł - \x1b[32mCena OK\x1b[0m`
@@ -198,6 +218,16 @@ async function compareOffers(driver, links) {
           reportString += `[] Termin ${singleOffers[key].date} - Oferta nieaktualna...\n`;
         } finally {
           numberOfTerms++;
+          fs.writeFileSync(`raporty/${fileName}.txt`, 
+          `Raport ${scrapeDomain} (${day}-${month}-${year} ${hours}:${minutes})
+          Znaleziono ${lowerPricesCount} ofert z niższą ceną
+          Sprawdzono ${numberOfTerms} terminów
+          
+          ${reportString}`, (err) => {
+            if (err) {
+              console.error("Error writing to file:", err);
+            }
+          });
         }
       }
     }
@@ -210,12 +240,6 @@ async function compareOffers(driver, links) {
         numberOfTerms +
         " terminów"
     );
-    reportString += `\nZakończono sprawdzanie. Pomyślnie sprawdzono ${numberOfTerms} terminów\n`;
-    fs.writeFile(`raporty/${fileName}.txt`, reportString, (err) => {
-      if (err) {
-        console.error("Error writing to file:", err);
-      }
-    });
   }
 }
 
