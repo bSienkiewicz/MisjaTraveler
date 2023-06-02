@@ -17,18 +17,17 @@ const year = currentDate.getUTCFullYear().toString();
 const hours = currentDate.getUTCHours().toString().padStart(2, "0");
 const minutes = currentDate.getUTCMinutes().toString().padStart(2, "0");
 
-
 const args = process.argv.slice(2);
 if (args.length > 0) {
   if (args.includes("--go")) {
-    scrapeDomain = "MisjaGo"
+    scrapeDomain = "MisjaGo";
   }
   if (args.includes("--short")) {
     onlyLowerPrices = true;
   }
 }
 
-const scrapeURL = `https://www.${scrapeDomain}.pl/?country-phrase%5B%5D=&search=offer&departure_city=&start_date=&end_date=&ppp=1`
+const scrapeURL = `https://www.${scrapeDomain}.pl/?country-phrase%5B%5D=&search=offer&departure_city=&start_date=&end_date=&ppp=1`;
 
 const fileName = `Raport ${scrapeDomain} ${day}-${month}-${year} ${hours}-${minutes}`;
 
@@ -82,10 +81,6 @@ async function getOffers() {
       });
     }
     console.log("Znaleziono " + links.length + " ofert");
-
-    reportString += `Raport ${scrapeDomain} ${day}-${month}-${year} ${hours}:${minutes}\n\n`
-
-    reportString += `Znaleziono ${links.length} ofert. Rozpoczynanie sprawdzania.\n`;
   } catch (err) {
     console.log(err);
     driver.quit();
@@ -133,7 +128,12 @@ async function compareOffers(driver, links) {
         };
       }
 
-      console.log(`\n\x1b[45mSPRAWDZONO ${i} / ${links.length} (${(i/links.length*100).toFixed(2)}%)\x1b[0m\n\n`);
+      console.log(
+        `\n\x1b[45mSPRAWDZONO ${i} / ${links.length} (${(
+          (i / links.length) *
+          100
+        ).toFixed(2)}%)\x1b[0m\n\n`
+      );
 
       console.log(
         "Sprawdzanie " +
@@ -141,9 +141,9 @@ async function compareOffers(driver, links) {
           " ofert dla " +
           tripName
       );
-      reportString += `--------------\n${tripName} (${Object.keys(
-        singleOffers
-      ).length} terminów)\n${links[i].link}\n--------------\n`;
+      reportString += `--------------\n${tripName} (${
+        Object.keys(singleOffers).length
+      } terminów)\n${links[i].link}\n--------------\n`;
 
       // SYKON LOOP
 
@@ -206,7 +206,6 @@ async function compareOffers(driver, links) {
               singleOffers[key].price - lowestPrice
             }ZŁ\n`;
             lowerPricesCount++;
-
           } else {
             console.log(
               ` └─  Najnizsza cena: ${singleOffers[key].price}zł - \x1b[32mCena OK\x1b[0m`
@@ -218,16 +217,15 @@ async function compareOffers(driver, links) {
           reportString += `[] Termin ${singleOffers[key].date} - Oferta nieaktualna...\n`;
         } finally {
           numberOfTerms++;
-          fs.writeFileSync(`raporty/${fileName}.txt`, 
-          `Raport ${scrapeDomain} (${day}-${month}-${year} ${hours}:${minutes})
-          Znaleziono ${lowerPricesCount} ofert z niższą ceną
-          Sprawdzono ${numberOfTerms} terminów
-          
-          ${reportString}`, (err) => {
-            if (err) {
-              console.error("Error writing to file:", err);
+          fs.writeFileSync(
+            `raporty/${fileName}.txt`,
+            `\t${fileName}\n\nZnaleziono ${lowerPricesCount} ofert z niższą ceną\nSprawdzono ${numberOfTerms} terminów\n\n${reportString}`,
+            (err) => {
+              if (err) {
+                console.error("Error writing to file:", err);
+              }
             }
-          });
+          );
         }
       }
     }
