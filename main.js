@@ -1,11 +1,13 @@
 const { By, Builder, until } = require("selenium-webdriver");
-require("chromedriver");
+// require("chromedriver");
+require("geckodriver");
 const fs = require("fs");
 const { on } = require("events");
 
 let reportString = "";
 let lowerPricesCount = 0;
 let scrapeDomain = "MisjaTravel";
+let browser = "chrome";
 let numberOfTerms = 0;
 let onlyLowerPrices = false;
 const currentDate = new Date();
@@ -25,9 +27,12 @@ if (args.length > 0) {
   if (args.includes("--short")) {
     onlyLowerPrices = true;
   }
+  if (args.includes("--firefox")) {
+    browser = "firefox";
+  }
 }
 
-const scrapeURL = `https://www.${scrapeDomain}.pl/?country-phrase%5B%5D=&search=offer&departure_city=&start_date=&end_date=&ppp=1`;
+const scrapeURL = `https://www.${scrapeDomain}.pl/?country-phrase%5B%5D=&search=offer&departure_city=&start_date=&end_date=&ppp=999`;
 
 const fileName = `Raport ${scrapeDomain} ${day}-${month}-${year} ${hours}-${minutes}`;
 
@@ -56,7 +61,7 @@ async function getOffers() {
     return;
   });
 
-  let driver = await new Builder().forBrowser("chrome").build();
+  let driver = await new Builder().forBrowser(browser).build();
   try {
     await driver.get(scrapeURL);
 
