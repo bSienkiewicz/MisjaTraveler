@@ -67,8 +67,8 @@ async function getOffers() {
     console.log("Folder raporty już istnieje");
   }
 
+  let driver = await new Builder().forBrowser(browser).build();
   try {
-    let driver = await new Builder().forBrowser(browser).build();
     await driver.get(scrapeURL);
 
     await closeCookie(driver);
@@ -92,12 +92,11 @@ async function getOffers() {
       });
     }
     console.log("Znaleziono " + links.length + " ofert");
-
-    compareOffers(driver, links);
   } catch (err) {
     console.log(err);
     driver.quit();
   }
+  compareOffers(driver, links);
 }
 
 async function compareOffers(driver, links) {
