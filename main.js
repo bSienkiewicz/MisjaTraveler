@@ -34,7 +34,8 @@ if (args.length > 0) {
 
 const scrapeURL = `https://www.${scrapeDomain}.pl/?country-phrase%5B%5D=&search=offer&departure_city=&start_date=&end_date=&ppp=999`;
 
-const fileName = `Raport ${scrapeDomain} ${day}-${month}-${year} ${hours}-${minutes}`;
+// const fileName = `Raport ${scrapeDomain} ${day}-${month}-${year} ${hours}-${minutes}`;
+const fileName = `Raport`;
 
 async function closeCookie(driver) {
   try {
@@ -57,12 +58,17 @@ async function closeCookie(driver) {
 async function getOffers() {
   let links = [];
 
-  fs.mkdir("raporty", () => {
-    return;
-  });
+  try{
+    fs.mkdir("raporty", () => {
+      return;
+    });
+    console.log("Folder raporty utworzony");
+  } catch (err) {
+    console.log("Folder raporty już istnieje");
+  }
 
-  let driver = await new Builder().forBrowser(browser).build();
   try {
+    let driver = await new Builder().forBrowser(browser).build();
     await driver.get(scrapeURL);
 
     await closeCookie(driver);
@@ -86,11 +92,11 @@ async function getOffers() {
       });
     }
     console.log("Znaleziono " + links.length + " ofert");
+
+    compareOffers(driver, links);
   } catch (err) {
     console.log(err);
     driver.quit();
-  } finally {
-    compareOffers(driver, links);
   }
 }
 
