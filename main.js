@@ -1,6 +1,8 @@
-const { By, Builder, until } = require("selenium-webdriver");
-// require("chromedriver");
-require("geckodriver");
+const Chrome = require('selenium-webdriver/chrome');
+const {suite} = require('selenium-webdriver/testing');
+const {Browser, By, Builder, until} = require("selenium-webdriver");
+const options = new Chrome.Options();
+
 const fs = require("fs");
 const { on } = require("events");
 
@@ -67,7 +69,8 @@ async function getOffers() {
     console.log("Folder raporty już istnieje");
   }
 
-  let driver = await new Builder().forBrowser(browser).build();
+  options.addArguments("--headless");
+  let driver = await new Builder().forBrowser(browser).setChromeOptions(options).build();
   try {
     await driver.get(scrapeURL);
 
