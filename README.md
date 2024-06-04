@@ -1,7 +1,7 @@
 # MisjaTravel Scraper
-This project is a web scraper built with JavaScript and Selenium WebDriver to extract travel offers from the MisjaTravel website and compare prices for different departure dates. It uses the ChromeDriver for automating the Chrome browser.
+MisjaTraveler is a tool I developed to identify and report discrepancies in flight pricing on MisjaTravel.pl. It's purpose was to address the issue of inconsistent flight prices due to occasional failures in updating the internal database with the latest prices from an external flights database. 
 
-It was created for a testing purpose only. I do not encourage the use of this software for any other purpose.
+By automating the process of price comparison, MisjaTraveler helped finding flights with price differences, which ultimately lead to resolution of the issue.
 
 ## Prerequisites
 Before running the scraper, make sure you have the following software installed:
@@ -10,22 +10,22 @@ Before running the scraper, make sure you have the following software installed:
 - Chrome browser
 - ChromeDriver
 
-## Installation
-Clone the repository:
+## Setup and Installation
+1. Clone the Repository:
+```
+git clone https://github.com/bSienkiewicz/MisjaTraveler.git
+cd misjatraveler`
+```
 
-`git clone https://github.com/bSienkiewicz/MisjaTraveler.git`
+2. Install the dependencies:
+```
+npm i
+```
 
-### Install the dependencies:
-
-`cd MisjaTraveler`
-`npm install`
-
-
-### Set up ChromeDriver:
-
-Download the appropriate version of ChromeDriver from the official website: 
-Extract the downloaded archive and place the chromedriver executable in a directory included in your system's PATH.
-
+3. Run the script:
+```
+node main.js
+```
 
 ## Usage
 1. Open a terminal and navigate to the project directory.
